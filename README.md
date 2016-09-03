@@ -3,7 +3,7 @@ Node-FreeRDP
 
 Node.JS addon for libfreerdp.
 
-*** Dependencies
+### Dependencies
 
 This requires the installation of libfreerdp 1.1.x.
 
@@ -16,15 +16,17 @@ On Ubuntu (from 15.04 forward -- earlier Ubuntus used freerdp 1.0.x which wont w
 
     sudo apt install freerdp
 
-Installation
+### Installation
 
     npm install node-freerdp
 
-*Note, this is a work in progress*
+_Note, this is a work in progress_
 
 The below example is the spec we are working towards. As of right now, only new session, bitmap events, and keyboard scancodes are working.
 
-Example usage:
+### Example Usage
+
+For the time being, this is the only documentation available.
 
     var freerdp = require('freerdp');
 
