@@ -1,15 +1,19 @@
 {
   "name": "freerdp",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Node.js bindings for libfreerdp / freerdp. Connect to RDP servers with Node.js",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "install": "node-gyp rebuild"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Michael Wasser",
+  "license": "BSD",
   "gypfile": true,
+  "repository" : {
+    "type" : "git",
+    "url" : "https://github.com/bloomapi/node-freerdp.git"
+  },
   "devDependencies": {
     "canvas": "^1.4.0"
   },
