@@ -20,10 +20,6 @@ On Ubuntu (from 15.04 forward -- earlier Ubuntus used freerdp 1.0.x which wont w
 
     npm install node-freerdp
 
-_Note, this is a work in progress_
-
-The below example is the spec we are working towards. As of right now, only new session, bitmap events, and keyboard scancodes are working.
-
 ### Example Usage
 
 For the time being, this is the only documentation available.
