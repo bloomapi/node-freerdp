@@ -117,3 +117,10 @@ Example of writing a current session screenshot to a png
     });
 
     setTimeout(function () { }, 10000); // prevent process from exiting
+
+### Roadmap
+
+* Add Clipboard support
+* Add better error handling
+* There's almost certainly memory issues with the current implementation... investigate and fix if needed
+* Find ways to funnel messages printed by libfreerdp to stdout to events
