@@ -106,6 +106,7 @@ static int g_thread_count = 0;
 struct thread_data
 {
   freerdp* instance;
+  bool stopping;
 };
 
 thread_data** sessions;
@@ -146,6 +147,40 @@ void node_begin_paint(rdpContext* context)
   rdpGdi* gdi = context->gdi;
   gdi->primary->hdc->hwnd->invalid->null = 1;
 }
+
+struct connect_args {};
+
+Local<Array> connect_args_parser(void *generic) {
+  connect_args *args = static_cast<connect_args *>(generic);
+
+  Local<Array> argv = New<Array>();
+
+  free(args);
+
+  return argv;
+}
+
+const struct GeneratorType CONNECT_GENERATOR_TYPE {
+  .name = "connect",
+  .arg_parser = connect_args_parser
+};
+
+Local<Array> close_args_parser(void *generic) {
+  connect_args *args = static_cast<connect_args *>(generic);
+
+  Local<Array> argv = New<Array>();
+
+  free(args);
+
+  return argv;
+}
+
+struct close_args {};
+
+const struct GeneratorType CLOSE_GENERATOR_TYPE {
+  .name = "close",
+  .arg_parser = close_args_parser
+};
 
 struct draw_args {
   int x;
@@ -317,10 +352,14 @@ BOOL node_post_connect(freerdp* instance)
 
   freerdp_channels_post_connect(instance->context->channels, instance);
 
+  nodeContext *nc = (nodeContext*)instance->context;
+  connect_args *args = (connect_args *)malloc(sizeof(connect_args));
+  generator_emit(nc->generatorContext, &CONNECT_GENERATOR_TYPE, args);
+
   return TRUE;
 }
 
-int tfreerdp_run(freerdp* instance)
+int tfreerdp_run(thread_data* data)
 {
   int i;
   int fds;
@@ -332,6 +371,9 @@ int tfreerdp_run(freerdp* instance)
   fd_set rfds_set;
   fd_set wfds_set;
   rdpChannels* channels;
+  struct timeval tv = {0, 100000}; // timeout fd wait every 100ms
+
+  freerdp* instance = data->instance;
 
   ZeroMemory(rfds, sizeof(rfds));
   ZeroMemory(wfds, sizeof(wfds));
@@ -373,7 +415,7 @@ int tfreerdp_run(freerdp* instance)
     if (max_fds == 0)
       break;
 
-    if (select(max_fds + 1, &rfds_set, &wfds_set, NULL, NULL) == -1)
+    if (select(max_fds + 1, &rfds_set, &wfds_set, NULL, &tv) == -1)
     {
       /* these are not really errors */
       if (!((errno == EAGAIN) ||
@@ -397,7 +439,15 @@ int tfreerdp_run(freerdp* instance)
       break;
     }
     node_process_channel_event(channels, instance);
+
+    if (data->stopping) { // thread signaled to shutdown
+      break;
+    }
   }
+
+  nodeContext *nc = (nodeContext*)instance->context;
+  close_args *args = (close_args *)malloc(sizeof(close_args));
+  generator_emit(nc->generatorContext, &CLOSE_GENERATOR_TYPE, args);
 
   freerdp_channels_close(channels, instance);
   freerdp_channels_free(channels);
@@ -411,7 +461,7 @@ void* thread_func(void* param)
   struct thread_data* data;
   data = (struct thread_data*) param;
 
-  tfreerdp_run(data->instance);
+  tfreerdp_run(data);
 
   free(data);
 
@@ -419,13 +469,13 @@ void* thread_func(void* param)
 
   g_thread_count--;
 
-        if (g_thread_count < 1)
-          ReleaseSemaphore(g_sem, 1, NULL);
+  if (g_thread_count < 1)
+    ReleaseSemaphore(g_sem, 1, NULL);
 
   return NULL;
 }
 
-int rdpConnect(int argc, char* argv[], Callback *callback)
+int node_freerdp_connect(int argc, char* argv[], Callback *callback)
 {
   int status;
   pthread_t thread;
@@ -483,43 +533,31 @@ int rdpConnect(int argc, char* argv[], Callback *callback)
   }
 
   freerdp_channels_global_uninit();*/
-  printf("running\n");
 
   return index;
 }
 
-void send_key_event_scancode(int session_index, int code, int pressed)
+void node_freerdp_send_key_event_scancode(int session_index, int code, int pressed)
 {
   thread_data* session = sessions[session_index];
   freerdp* instance = session->instance;
   rdpInput* input = instance->input;
-  //nodeContext* context = (nodeContext*) instance->context;
 
   freerdp_input_send_keyboard_event_ex(input, pressed, code);
 }
 
-void send_pointer_event(int session_index, int x, int y, int button, int pressed)
+void node_freerdp_send_pointer_event(int session_index, int flags, int x, int y)
 {
   thread_data* session = sessions[session_index];
   freerdp* instance = session->instance;
   rdpInput* input = instance->input;
 
-  int flags = PTR_FLAGS_MOVE;
-
-  // TODO: BUTTON PUSHES
-  /*if (button == 1) {
-
-  } else if (button == 2) {
-
-  } else if (button == 3) {
-
-  }
-
-  if (pressed == 1) {
-
-  } else {
-
-  }*/
-
   input->MouseEvent(input, flags, x, y);
+}
+
+void node_freerdp_close(int session_index)
+{
+  thread_data *session = sessions[session_index];
+  session->stopping = true;
+  // TODO: Wait for thread exit?
 }

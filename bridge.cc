@@ -37,31 +37,35 @@ NAN_METHOD(Connect) {
 
   Callback *callback = new Callback(info[1].As<Function>());
 
-  int sessionIndex = rdpConnect(jsArray->Length() + 1, cstrings, callback);
-  info.GetReturnValue().Set(sessionIndex);
+  int session_index = node_freerdp_connect(jsArray->Length() + 1, cstrings, callback);
+  info.GetReturnValue().Set(session_index);
 }
 
 NAN_METHOD(SendKeyEventScancode) {
   Nan::HandleScope scope;
 
-  int sessionIndex = info[0]->Uint32Value();
+  int session_index = info[0]->Uint32Value();
   int scanCode = info[1]->Uint32Value();
   int pressed = info[2]->Uint32Value();
-  send_key_event_scancode(sessionIndex, scanCode, pressed);
+
+  node_freerdp_send_key_event_scancode(session_index, scanCode, pressed);
 }
 
 NAN_METHOD(SendPointerEvent) {
   Nan::HandleScope scope;
 
-  int sessionIndex = info[0]->Uint32Value();
-  int x = info[1]->Uint32Value();
-  int y = info[2]->Uint32Value();
-  int button = info[3]->Uint32Value();
-  int pressed = info[2]->Uint32Value();
-  
-  send_pointer_event(sessionIndex, x, y, button, pressed);
+  int session_index = info[0]->Uint32Value();
+  int flags = info[1]->Uint32Value();
+  int x = info[2]->Uint32Value();
+  int y = info[3]->Uint32Value();
+
+  node_freerdp_send_pointer_event(session_index, flags, x, y);
 }
 
 NAN_METHOD(Close) {
   Nan::HandleScope scope;
+
+  int session_index = info[0]->Uint32Value();
+
+  node_freerdp_close(session_index);
 }

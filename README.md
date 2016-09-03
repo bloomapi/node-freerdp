@@ -41,8 +41,10 @@ For the time being, this is the only documentation available.
     session.on('connect', function () {
       console.log('connected');
 
-      var x = 10, y = 20, button = 'left', isPressed = true; // button can be left, right, middle
-      session.sendPointerEvent(x, y, button, isPressed);
+      var x = 10, y = 20; // if x / y are null, will not move mouse
+      session.sendPointerEvent(x, y, {
+        pressLeft: true // Other options are pressMiddle, pressRight, releaseLeft|Middle|Right
+      });
 
       var code = 0x23; // letter 'H'
       var specialKey = false; // set to true if you're sending the host key or others
@@ -50,7 +52,7 @@ For the time being, this is the only documentation available.
 
       setTimeout(function () {
         session.close(); // end session
-      }, 1000);
+      }, 50000);
     });
 
     session.on('bitmap', function (bitmap) {
