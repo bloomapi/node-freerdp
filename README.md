@@ -18,7 +18,7 @@ On Ubuntu (from 15.04 forward -- earlier Ubuntus used freerdp 1.0.x which wont w
 
 ### Installation
 
-    npm install node-freerdp
+    npm install freerdp
 
 ### Example Usage
 
