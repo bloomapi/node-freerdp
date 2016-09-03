@@ -81,9 +81,6 @@ struct node_context
 };
 typedef struct node_context nodeContext;
 
-HANDLE g_sem;
-static int g_thread_count = 0;
-
 struct thread_data
 {
   freerdp* instance;
@@ -92,6 +89,8 @@ struct thread_data
 
 thread_data** sessions;
 int sessionCount = 0;
+
+bool node_freerdp_global_init = false;
 
 int add_session(thread_data* session)
 {
@@ -430,6 +429,8 @@ int tfreerdp_run(thread_data* data)
   close_args *args = (close_args *)malloc(sizeof(close_args));
   generator_emit(nc->generatorContext, &CLOSE_GENERATOR_TYPE, args);
 
+  free(nc->generatorContext);
+
   freerdp_channels_close(channels, instance);
   freerdp_channels_free(channels);
   freerdp_free(instance);
@@ -448,11 +449,6 @@ void* thread_func(void* param)
 
   pthread_detach(pthread_self());
 
-  g_thread_count--;
-
-  if (g_thread_count < 1)
-    ReleaseSemaphore(g_sem, 1, NULL);
-
   return NULL;
 }
 
@@ -466,9 +462,10 @@ int node_freerdp_connect(int argc, char* argv[], Callback *callback)
   rdpSettings* settings = nullptr;
   nodeContext* nContext;
 
-  freerdp_channels_global_init(); // TODO: This should only happen once
-
-  g_sem = CreateSemaphore(NULL, 0, 1, NULL);
+  if (!node_freerdp_global_init) {
+    node_freerdp_global_init = true;
+    freerdp_channels_global_init();
+  }
 
   instance = freerdp_new();
   instance->PreConnect = node_pre_connect;
@@ -481,7 +478,7 @@ int node_freerdp_connect(int argc, char* argv[], Callback *callback)
   freerdp_context_new(instance);
 
   nContext = (nodeContext*)instance->context;
-  nContext->generatorContext = new GeneratorContext; // TODO: Free
+  nContext->generatorContext = new GeneratorContext;
   nContext->generatorContext->callback = callback;
 
   channels = instance->context->channels;
@@ -500,20 +497,9 @@ int node_freerdp_connect(int argc, char* argv[], Callback *callback)
 
   data->instance = instance;
 
-  g_thread_count++;
-
   pthread_create(&thread, 0, thread_func, data);
 
   int index = add_session(data);
-
-
-  // TODO: How to make this not block?
-  /*while (g_thread_count > 0)
-  {
-    WaitForSingleObject(g_sem, INFINITE);
-  }
-
-  freerdp_channels_global_uninit();*/
 
   return index;
 }
@@ -538,7 +524,7 @@ void node_freerdp_send_pointer_event(int session_index, int flags, int x, int y)
 
 void node_freerdp_close(int session_index)
 {
+  // NOTE: Doesn't block on closed session, will send closed event when completed
   thread_data *session = sessions[session_index];
   session->stopping = true;
-  // TODO: Wait for thread exit?
 }
