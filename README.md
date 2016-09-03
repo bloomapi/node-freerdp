@@ -45,7 +45,7 @@ For the time being, this is the only documentation available.
       });
 
       var code = 0x23; // letter 'H'
-      var specialKey = false; // set to true if you're sending the host key or others
+      var isPressed = true;
       session.sendKeyEventScancode(code, isPressed);
 
       setTimeout(function () {
