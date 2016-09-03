@@ -1,5 +1,5 @@
 {
-  "name": "node-freerdp",
+  "name": "freerdp",
   "version": "0.2.0",
   "description": "Node.js bindings for libfreerdp / freerdp. Connect to RDP servers with Node.js",
   "main": "index.js",
@@ -11,11 +11,11 @@
   "license": "ISC",
   "gypfile": true,
   "devDependencies": {
-    "nan": "^2.4.0",
-    "node-gyp": "^3.4.0"
+    "canvas": "^1.4.0"
   },
   "dependencies": {
-    "bindings": "^1.2.1",
-    "canvas": "^1.4.0"
+    "nan": "^2.4.0",
+    "node-gyp": "^3.4.0",
+    "bindings": "^1.2.1"
   }
 }

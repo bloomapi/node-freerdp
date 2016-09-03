@@ -36,6 +36,8 @@ For the time being, this is the only documentation available.
       password: 'mypass',
       domain: 'mydomain', // optional
       port: 3389, // optional
+      width: 1366, // optional
+      height: 768 // optional
     });
 
     session.on('connect', function () {
@@ -69,3 +71,53 @@ For the time being, this is the only documentation available.
     });
 
     session.connect();
+
+Example of writing a current session screenshot to a png
+
+    var freerdp = require('freerdp');
+    var Canvas = require('canvas');
+    var fs = require('fs');
+
+    var canvas = new Canvas(1366, 768),
+        ctx = canvas.getContext('2d');
+
+    var session = new freerdp.Session({
+      host: 'my.host',
+      username: 'myuser',
+      password: 'mypass',
+      domain: 'mydomain', // optional
+      port: 3389, // optional
+      width: 1366, // optional
+      height: 768 // optional
+    });
+
+    session.on('connect', function () {
+      setInterval(function () {
+        var b = canvas.toBuffer();
+        fs.writeFileSync('screenshot.png', b, 'binary');
+      }, 1000);
+    })
+
+    session.on('bitmap', function (bitmap) {
+      var imageData = ctx.createImageData(bitmap.w, bitmap.h);
+      var dest = new Uint8ClampedArray(bitmap.w * bitmap.h * bitmap.bpp);
+      var size = bitmap.w * bitmap.h * bitmap.bpp;
+      // ARGB to RGBA
+      for (var i = 0; i < bitmap.h; i++)
+      {
+        for (var j = 0; j < bitmap.w * 4; j += 4)
+        {
+          // ARGB <-> ABGR
+          dest[(i * bitmap.bpp * bitmap.w) + j + 0] = bitmap.buffer[(i * bitmap.bpp * bitmap.w) + j + 2];
+          dest[(i * bitmap.bpp * bitmap.w) + j + 1] = bitmap.buffer[(i * bitmap.bpp * bitmap.w) + j + 1];
+          dest[(i * bitmap.bpp * bitmap.w) + j + 2] = bitmap.buffer[(i * bitmap.bpp * bitmap.w) + j + 0];
+          dest[(i * bitmap.bpp * bitmap.w) + j + 3] = bitmap.buffer[(i * bitmap.bpp * bitmap.w) + j + 3];
+        }
+      }
+
+      imageData.data.set(dest);
+
+      ctx.putImageData(imageData, bitmap.x, bitmap.y);
+    });
+
+    setTimeout(function () { }, 10000); // prevent process from exiting
