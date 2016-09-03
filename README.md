@@ -70,6 +70,8 @@ For the time being, this is the only documentation available.
 
 Example of writing a current session screenshot to a png
 
+Install extra dependency for example with `npm install canvas`
+
     var freerdp = require('freerdp');
     var Canvas = require('canvas');
     var fs = require('fs');
