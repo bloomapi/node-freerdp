@@ -1,4 +1,4 @@
-var rdp = require('./build/release/node-freerdp');
+var rdp = require('./build/release/freerdp');
 var EventEmitter = require('events');
 
 // This is from include/freerdp/input.h to simplify addon code
