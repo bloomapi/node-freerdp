@@ -14,7 +14,7 @@ On Mac:
 
 On Ubuntu (from 15.04 forward -- earlier Ubuntus used freerdp 1.0.x which wont work):
 
-    sudo apt install freerdp
+    sudo apt install freerdp libfreerdp-dev
 
 ### Installation
 
