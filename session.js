@@ -31,10 +31,6 @@ class Session extends EventEmitter {
   sendPointerEvent(x, y, options) {
     var flags = 0;
 
-    if (x !== null && y !== null) {
-      flags |= PTR_FLAGS_MOVE;
-    }
-
     x = x || 0;
     y = y || 0;
 
@@ -46,6 +42,9 @@ class Session extends EventEmitter {
     if (options.releaseMiddle) flags |= PTR_FLAGS_BUTTON2;
     if (options.releaseRight) flags |= PTR_FLAGS_BUTTON3;
 
+    if (x !== null && y !== null && flags == 0) {
+      flags |= PTR_FLAGS_MOVE;
+    }
 
     rdp.sendPointerEvent(this._sessionIndex, flags, x, y);
   }
