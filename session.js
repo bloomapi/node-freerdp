@@ -47,7 +47,7 @@ class Session extends EventEmitter {
     if (options.releaseRight) flags |= PTR_FLAGS_BUTTON3;
 
 
-    rdp.sendMouseEvent(this._sessionIndex, flags, x, y);
+    rdp.sendPointerEvent(this._sessionIndex, flags, x, y);
   }
 
   close() {
