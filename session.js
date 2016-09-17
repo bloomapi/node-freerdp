@@ -50,6 +50,10 @@ class Session extends EventEmitter {
     rdp.sendPointerEvent(this._sessionIndex, flags, x, y);
   }
 
+  setClipboard(val) {
+    rdp.setClipboard(this._sessionIndex, val);
+  }
+
   close() {
     rdp.close(this._sessionIndex);
   }
@@ -68,6 +72,8 @@ class Session extends EventEmitter {
     params.push(`/w:${this.width}`);
     params.push(`/h:${this.height}`);
     params.push(`/bpp:${this.bitsPerPixel}`);
+
+    params.push('+clipboard');
 
     if (this.certIgnore) {
       params.push('/cert-ignore');

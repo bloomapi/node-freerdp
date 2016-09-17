@@ -19,6 +19,9 @@ NAN_MODULE_INIT(InitAll) {
   Set(target, New<String>("sendPointerEvent").ToLocalChecked(),
     GetFunction(New<FunctionTemplate>(SendPointerEvent)).ToLocalChecked());
 
+  Set(target, New<String>("setClipboard").ToLocalChecked(),
+    GetFunction(New<FunctionTemplate>(SetClipboard)).ToLocalChecked());
+
   Set(target, New<String>("close").ToLocalChecked(),
     GetFunction(New<FunctionTemplate>(Close)).ToLocalChecked());
 }

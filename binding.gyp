@@ -3,9 +3,11 @@
         {
             "target_name": "node-freerdp",
             "sources": [
+              "context.cc",
               "generator.cc",
               "rdp.cc",
               "bridge.cc",
+              "cliprdr.cc",
               "node-freerdp.cc"
             ],
             "libraries": [

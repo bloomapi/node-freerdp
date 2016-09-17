@@ -15,6 +15,8 @@
 #include "rdp.h"
 
 #include "generator.h"
+#include "context.h"
+#include "cliprdr.h"
 
 #include <errno.h>
 #include <stdio.h>
@@ -29,6 +31,7 @@
 #include <freerdp/client/file.h>
 #include <freerdp/client/cmdline.h>
 #include <freerdp/client/cliprdr.h>
+#include <freerdp/client/channels.h>
 #include <freerdp/channels/channels.h>
 
 #include <winpr/crt.h>
@@ -46,22 +49,6 @@ using v8::Local;
 using v8::String;
 using Nan::New;
 using Nan::Null;
-
-struct node_info
-{
-  void* data;
-};
-typedef struct node_info nodeInfo;
-
-struct node_context
-{
-  rdpContext _p;
-
-  nodeInfo* nodei;
-  GeneratorContext *generatorContext;
-  //void* clipboard_context;
-};
-typedef struct node_context nodeContext;
 
 struct thread_data
 {
@@ -217,38 +204,46 @@ void node_end_paint(rdpContext* context)
   generator_emit(nc->generatorContext, &DRAW_GENERATOR_TYPE, args);
 }
 
+/* returns rdpChannel for the channel id passed in */
+rdpChannel* node_channels_find_channel_by_id(rdpChannels* channels, rdpSettings* settings, int channel_id, int* pindex)
+{
+  int index;
+  int count;
+  rdpChannel* channel;
+
+  count = settings->ChannelCount;
+
+  for (index = 0; index < count; index++)
+  {
+    channel = &settings->ChannelDefArray[index];
+
+    if (channel->ChannelId == channel_id)
+    {
+      if (pindex != 0)
+        *pindex = index;
+
+      return channel;
+    }
+  }
+
+  return NULL;
+}
+
 int node_receive_channel_data(freerdp* instance, int channelId, BYTE* data, int size, int flags, int total_size)
 {
   return freerdp_channels_data(instance, channelId, data, size, flags, total_size);
-}
-
-void node_process_cb_monitor_ready_event(rdpChannels* channels, freerdp* instance)
-{
-  wMessage* event;
-  RDP_CB_FORMAT_LIST_EVENT* format_list_event;
-
-  event = freerdp_event_new(CliprdrChannel_Class, CliprdrChannel_FormatList, NULL, NULL);
-
-  format_list_event = (RDP_CB_FORMAT_LIST_EVENT*) event;
-  format_list_event->num_formats = 0;
-
-  freerdp_channels_send_event(channels, event);
 }
 
 void node_process_channel_event(rdpChannels* channels, freerdp* instance)
 {
   wMessage* event;
 
-  event = freerdp_channels_pop_event(channels);
-
-  if (event)
-  {
-    switch (GetMessageType(event->id))
+  while((event = freerdp_channels_pop_event(channels)) != NULL) {
+    switch (GetMessageClass(event->id))
     {
-      case CliprdrChannel_MonitorReady:
-        node_process_cb_monitor_ready_event(channels, instance);
+      case CliprdrChannel_Class:
+        node_process_cliprdr_event(instance, event);
         break;
-
       default:
         printf("node_process_channel_event: unknown event type %d\n", GetMessageType(event->id));
         break;
@@ -311,6 +306,8 @@ BOOL node_post_connect(freerdp* instance)
 
   instance->update->BeginPaint = node_begin_paint;
   instance->update->EndPaint = node_end_paint;
+
+  node_cliprdr_init(instance);
 
   freerdp_channels_post_connect(instance->context->channels, instance);
 
@@ -411,6 +408,8 @@ int tfreerdp_run(thread_data* data)
   close_args *args = (close_args *)malloc(sizeof(close_args));
   generator_emit(nc->generatorContext, &CLOSE_GENERATOR_TYPE, args);
 
+  node_cliprdr_uninit(instance);
+
   free(nc->generatorContext);
 
   freerdp_channels_close(channels, instance);
@@ -503,6 +502,14 @@ void node_freerdp_send_pointer_event(int session_index, int flags, int x, int y)
   rdpInput* input = instance->input;
 
   input->MouseEvent(input, flags, x, y);
+}
+
+void node_freerdp_set_clipboard(int session_index, void* data, int len)
+{
+  thread_data* session = sessions[session_index];
+  freerdp* instance = session->instance;
+
+  node_process_cliprdr_set_clipboard_data(instance, data, len);
 }
 
 void node_freerdp_close(int session_index)

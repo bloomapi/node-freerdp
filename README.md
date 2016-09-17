@@ -22,7 +22,7 @@ On Ubuntu (from 15.04 forward -- earlier Ubuntus used freerdp 1.0.x which wont w
 
 ### Example Usage
 
-For the time being, this is the only documentation available.
+For the time being, this is the only API documentation available.
 
     var freerdp = require('freerdp');
 
@@ -69,7 +69,7 @@ For the time being, this is the only documentation available.
 
     session.connect();
 
-Example of writing a current session screenshot to a png
+Example of writing a current session screenshot to a png and pasting text
 
 Install extra dependency for example with `npm install canvas`
 
@@ -96,6 +96,22 @@ Install extra dependency for example with `npm install canvas`
         var b = canvas.toBuffer();
         fs.writeFileSync('screenshot.png', b, 'binary');
       }, 1000);
+
+      setTimeout(function () {
+        // Set contents of local clipboard
+        session.setClipboard("Hello World\n");
+      }, 2500);
+
+      setTimeout(function () {
+        // Press paste hotkey sequence to initialize paste, pulling
+        // the contents of local clipboard and pasting on the remote system.
+        // Note this only works if the current focus supports this hotkey sequence
+        // (focused on notepad, for example)
+        session.sendKeyEventScancode(0x001d, true); // ctrl
+        session.sendKeyEventScancode(0x002F, true); // v
+        session.sendKeyEventScancode(0x002F, false);
+        session.sendKeyEventScancode(0x001d, false);
+      }, 3000);
     })
 
     session.on('bitmap', function (bitmap) {
@@ -124,7 +140,6 @@ Install extra dependency for example with `npm install canvas`
 
 ### Roadmap
 
-* Add Clipboard support
 * Add better error handling
 * There's almost certainly memory issues with the current implementation... investigate and fix if needed
 * Find ways to funnel messages printed by libfreerdp to stdout to events

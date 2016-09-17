@@ -62,6 +62,16 @@ NAN_METHOD(SendPointerEvent) {
   node_freerdp_send_pointer_event(session_index, flags, x, y);
 }
 
+
+NAN_METHOD(SetClipboard) {
+  Nan::HandleScope scope;
+
+  int session_index = info[0]->Uint32Value();
+  std::string str = std::string(*String::Utf8Value(info[1]));
+
+  node_freerdp_set_clipboard(session_index, (void*)str.c_str(), str.size());
+}
+
 NAN_METHOD(Close) {
   Nan::HandleScope scope;
 
