@@ -33,7 +33,8 @@ For the time being, this is the only documentation available.
       domain: 'mydomain', // optional
       port: 3389, // optional
       width: 1366, // optional
-      height: 768 // optional
+      height: 768, // optional
+      certIgnore: true // optional
     });
 
     session.on('connect', function () {
@@ -54,7 +55,7 @@ For the time being, this is the only documentation available.
     });
 
     session.on('bitmap', function (bitmap) {
-      console.log(`bitmap at ${bitmap.x}, ${bitmap.y}, of dimensions ${bitmap.width}, ${bitmap.height}`);
+      console.log(`bitmap at ${bitmap.x}, ${bitmap.y}, of dimensions ${bitmap.w}, ${bitmap.h}`);
       // bitmap.data contains RGBA buffer where each pixel is of bitmap.bytesPerPixel size
     });
 
@@ -86,7 +87,8 @@ Install extra dependency for example with `npm install canvas`
       domain: 'mydomain', // optional
       port: 3389, // optional
       width: 1366, // optional
-      height: 768 // optional
+      height: 768, // optional
+      certIgnore: true // optional
     });
 
     session.on('connect', function () {

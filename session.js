@@ -68,6 +68,10 @@ class Session extends EventEmitter {
     params.push(`/h:${this.height}`);
     params.push(`/bpp:${this.bitsPerPixel}`);
 
+    if (this.certIgnore) {
+      params.push('/cert-ignore');
+    }
+
     if (this.domain) {
       params.push(`/d:${this.domain}`);
     }

@@ -47,19 +47,6 @@ using v8::String;
 using Nan::New;
 using Nan::Null;
 
-/*struct tf_info
-{
-  void* data;
-};
-typedef struct tf_info tfInfo;
-
-struct tf_context
-{
-  rdpContext _p;
-
-  tfInfo* tfi;
-};
-typedef struct tf_context tfContext;*/
 struct node_info
 {
   void* data;
@@ -72,11 +59,6 @@ struct node_context
 
   nodeInfo* nodei;
   GeneratorContext *generatorContext;
-
-  //ANDROID_EVENT_QUEUE* event_queue;
-  //pthread_t thread;
-  //BOOL is_connected;
-
   //void* clipboard_context;
 };
 typedef struct node_context nodeContext;
@@ -496,6 +478,7 @@ int node_freerdp_connect(int argc, char* argv[], Callback *callback)
   ZeroMemory(data, sizeof(sizeof(struct thread_data)));
 
   data->instance = instance;
+  data->stopping = false;
 
   pthread_create(&thread, 0, thread_func, data);
 

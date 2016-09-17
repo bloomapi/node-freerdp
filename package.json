@@ -1,6 +1,6 @@
 {
   "name": "freerdp",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "Node.js bindings for libfreerdp / freerdp. Connect to RDP servers with Node.js",
   "main": "index.js",
   "scripts": {
