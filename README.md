@@ -20,6 +20,13 @@ On Ubuntu (from 15.04 forward -- earlier Ubuntus used freerdp 1.0.x which wont w
 
     npm install freerdp
 
+### Features
+
+This is based on FreeRDP. Any standard features of FreeRDP are supported as a result. Many
+flags you see on the command line version of xfreerdp are easily added to the current codebase
+if a desired functionality is missing from this Node.js wrapper library. This includes things
+such as Network Level Authentication (NLA) and clipboard redirection.
+
 ### Example Usage
 
 For the time being, this is the only API documentation available.
