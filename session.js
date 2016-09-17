@@ -36,12 +36,12 @@ class Session extends EventEmitter {
     y = y || 0;
 
     if (options.pressLeft) flags |= PTR_FLAGS_BUTTON1 | PTR_FLAGS_DOWN;
-    if (options.pressMiddle) flags |= PTR_FLAGS_BUTTON2 | PTR_FLAGS_DOWN;
-    if (options.pressRight) flags |= PTR_FLAGS_BUTTON3 | PTR_FLAGS_DOWN;
+    if (options.pressMiddle) flags |= PTR_FLAGS_BUTTON3 | PTR_FLAGS_DOWN;
+    if (options.pressRight) flags |= PTR_FLAGS_BUTTON2 | PTR_FLAGS_DOWN;
 
     if (options.releaseLeft) flags |= PTR_FLAGS_BUTTON1;
-    if (options.releaseMiddle) flags |= PTR_FLAGS_BUTTON2;
-    if (options.releaseRight) flags |= PTR_FLAGS_BUTTON3;
+    if (options.releaseMiddle) flags |= PTR_FLAGS_BUTTON3;
+    if (options.releaseRight) flags |= PTR_FLAGS_BUTTON2;
 
     if (x !== null && y !== null && flags == 0) {
       flags |= PTR_FLAGS_MOVE;
