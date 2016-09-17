@@ -22,6 +22,7 @@ class Session extends EventEmitter {
     this.width = options.width || 1366;
     this.height = options.height || 768;
     this.bitsPerPixel = 24;
+    this.certIgnore = options.certIgnore;
   }
 
   sendKeyEventScancode(code, pressed) {
